@@ -4,12 +4,25 @@ import { v4 } from 'uuid';
 
 import { Cart } from '../models';
 
+import { сlient } from '../../db/connection';
+
 @Injectable()
 export class CartService {
   private userCarts: Record<string, Cart> = {};
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
+  async findByUserId(userId: string): Promise<Cart> {
+    try {
+      const { rows } = userId ? await сlient.query(`
+        select * 
+        from carts c
+        join orders as o 
+        on c.id = o.cart_id
+        where o.user_id = '${userId}'
+      `) : { rows: [] };
+      return rows[0];
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   createByUserId(userId: string) {
@@ -19,13 +32,13 @@ export class CartService {
       items: [],
     };
 
-    this.userCarts[ userId ] = userCart;
+    this.userCarts[userId] = userCart;
 
     return userCart;
   }
 
-  findOrCreateByUserId(userId: string): Cart {
-    const userCart = this.findByUserId(userId);
+  async findOrCreateByUserId(userId: string): Promise<Cart> {
+    const userCart = await this.findByUserId(userId);
 
     if (userCart) {
       return userCart;
@@ -34,22 +47,22 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
+  async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
+    const { id, ...rest } = await this.findOrCreateByUserId(userId);
 
     const updatedCart = {
       id,
       ...rest,
-      items: [ ...items ],
+      items: [...items],
     }
 
-    this.userCarts[ userId ] = { ...updatedCart };
+    this.userCarts[userId] = { ...updatedCart };
 
     return { ...updatedCart };
   }
 
   removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
+    this.userCarts[userId] = null;
   }
 
 }

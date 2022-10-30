@@ -1,0 +1,47 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS carts (
+  id uuid DEFAULT uuid_generate_v4(),
+  created_at date DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at date DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS cart_items (
+  cart_id uuid NOT NULL,
+  product_id uuid NOT NULL,
+  count integer,
+  PRIMARY KEY(cart_id, product_id),
+  FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id uuid DEFAULT uuid_generate_v4(),
+    user_id uuid NOT NULL,
+    cart_id uuid NOT NULL,
+    payment json,
+    delivery json,
+    comments text,
+    status text,
+    total integer,
+    PRIMARY KEY(id),
+    FOREIGN KEY (cart_id) REFERENCES carts(id)
+);
+
+INSERT INTO carts (id) VALUES
+    ('10edb5d4-9156-456e-8aec-558f22a35315'),
+    ('08aa9c20-910f-47d9-ae8e-dcbc25831959'),
+    ('36c74b98-5b2f-4dc7-b9f9-2bd850774867'),
+    ('52eaea29-e1f3-407d-ab7c-cf72dee65805');
+
+INSERT INTO cart_items (cart_id, product_id, count) VALUES
+    ('10edb5d4-9156-456e-8aec-558f22a35315', '78022ba0-5909-4778-9395-abe21a0da0a3', 2),
+    ('08aa9c20-910f-47d9-ae8e-dcbc25831959', 'e8afe536-dbec-4ddc-9616-6aff3c3d9aab', 3),
+    ('36c74b98-5b2f-4dc7-b9f9-2bd850774867', 'c7cf6f07-38dd-4f1d-a05e-3b23843df143', 5),
+    ('52eaea29-e1f3-407d-ab7c-cf72dee65805', '25e67960-e199-4d05-8d7f-1025e9c53667', 7);
+
+INSERT INTO orders (user_id, cart_id, payment, delivery, comments, status, total) VALUES
+    ('cae49566-9dbe-45aa-a1a1-cba5072fdfa0', '10edb5d4-9156-456e-8aec-558f22a35315', '{}', '{}', 'Comments', 'Status', 2),
+    ('76bc8ddf-98f4-4b4d-96ef-839f98866d7e', '08aa9c20-910f-47d9-ae8e-dcbc25831959', '{}', '{}', 'Comments', 'Status', 3),
+    ('5aaeac6b-8891-4934-af7e-5df0d601d6cd', '36c74b98-5b2f-4dc7-b9f9-2bd850774867', '{}', '{}', 'Comments', 'Status', 5),
+    ('b619706e-46b8-43cd-9789-833ce7598b94', '52eaea29-e1f3-407d-ab7c-cf72dee65805', '{}', '{}', 'Comments', 'Status', 7);
