@@ -18,6 +18,15 @@ provider:
 functions:
   main:
     handler: dist/main.handler
+    timeout: 30
+    vpc:
+      securityGroupIds:
+        - sg-0018a004b49a126bf
+        - sg-02ac2956ccfda2ea4
+      subnetIds:
+        - subnet-0ef3466aad9dd6797
+        - subnet-032c6718742e2f078
+        - subnet-016182e6541c2ffbd
     events:
       - http:
           method: ANY
