@@ -13,7 +13,9 @@ export class CartService {
     try {
       const сlient = await getClient();
       const { rows } = userId ? await сlient.query(`
-        select * 
+        select 
+          c.id,
+          o.user_id
         from carts c
         join orders as o 
         on c.id = o.cart_id
@@ -54,7 +56,7 @@ export class CartService {
       return userCart;
     }
 
-    return this.createByUserId(userId);
+    return await this.createByUserId(userId);
   }
 
   async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
@@ -66,7 +68,18 @@ export class CartService {
       items: [...items],
     }
 
-    this.userCarts[userId] = { ...updatedCart };
+    const сlient = await getClient();
+    try {
+      const query = `${items.reduce((query, item) => {
+        return `${query} ('${id}', '${item.product}', '${item.count}')`
+      }, 'INSERT INTO cart_items (cart_id, product_id, count) VALUES')}
+        ON CONFLICT (cart_id, product_id) 
+        DO 
+         UPDATE SET count = EXCLUDED.count;`
+      await сlient.query(query);
+    } catch (error) {
+      console.log(error);
+    }
 
     return { ...updatedCart };
   }
@@ -77,7 +90,7 @@ export class CartService {
       await сlient.query(`
         delete from carts c
         using orders as o
-        where  o.cart_id = carts.id
+        where o.cart_id = carts.id
           and o.user_id = '${userId}'
       `);
     } catch (error) {

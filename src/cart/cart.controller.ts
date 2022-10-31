@@ -53,20 +53,10 @@ export class CartController {
 
   @Post('checkout')
   async checkout(@Req() req: AppRequest, @Body() body) {
-    const { userId } = body;
+    const { userId, items } = body;
     const cart = await this.cartService.findByUserId(userId);
 
-    if (!(cart && cart.items.length)) {
-      const statusCode = HttpStatus.BAD_REQUEST;
-      req.statusCode = statusCode
-
-      return {
-        statusCode,
-        message: 'Cart is empty',
-      }
-    }
-
-    const { id: cartId, items } = cart;
+    const { id: cartId } = cart;
     const total = calculateCartTotal(cart);
     const order = this.orderService.create({
       ...body, // TODO: validate and pick only necessary data

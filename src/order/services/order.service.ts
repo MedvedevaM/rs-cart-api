@@ -22,14 +22,16 @@ export class OrderService {
   }
 
   async create(data: any) {
-    const id = v4(v4())
     const order = {
       ...data,
-      id,
       status: 'inProgress',
     };
 
-    this.orders[ id ] = order;
+    const сlient = await getClient();
+    await сlient.query(`
+        insert into orders (user_id, cart_id, payment, delivery, comments, status, total) values 
+        ('${data.userId}', '${data.cartId}', '${data.payment}', '${data.delivery}', '${data.comments}', '${data.status}', ${data.total})
+      `);
 
     return order;
   }
@@ -41,9 +43,15 @@ export class OrderService {
       throw new Error('Order does not exist.');
     }
 
-    this.orders[ orderId ] = {
-      ...data,
-      id: orderId,
-    }
+    const сlient = await getClient();
+    await сlient.query(`
+      update orders
+      set payment = '${JSON.stringify(data.payment)}',
+        delivery = '${JSON.stringify(data.delivery)}',
+        comments = '${data.comments || ''}',
+        status = '${data.status || ''}',
+        total = '${data.total || 0}',
+      where id = '${orderId}';
+    `);
   }
 }
