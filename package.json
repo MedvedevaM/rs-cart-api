@@ -8,6 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build --webpack",
+    "postbuild": "cp package*.json dist && cd dist && npm ci --production",
     "deploy": "npm run build && sls deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -29,8 +30,6 @@
     "@vendia/serverless-express": "^4.10.1",
     "aws-lambda": "^1.0.7",
     "pg": "^8.8.0",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.5.4",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
