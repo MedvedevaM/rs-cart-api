@@ -1,0 +1,19 @@
+# prevents local modules and debug logs from being copied onto Docker image and possibly overwriting modules installed within image.
+node_modules
+npm-debug.log
+.serverless
+dist
+.git
+
+# not to expose the entire blueprint of Docker application
+.dockerignore
+
+# ignore test files
+test
+src/**/*.spec.ts
+
+# ignore files, which are not needed for deployment
+sql.txt
+.prettierrc
+.eslintrc.js
+
